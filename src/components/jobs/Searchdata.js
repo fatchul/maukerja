@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import viewJobs from './Viewdata';
 import { Route, Link } from "react-router-dom";
 import _ from 'lodash';
+import async from 'async';
 const mainAPI = "http://private-anon-01287be5a8-frontendtestmaukerja.apiary-proxy.com/job";
 const api2 = "http://private-27298f-frontendtestmaukerja.apiary-mock.com/jobs?limit=20";
 
@@ -17,17 +18,28 @@ class Searchdata extends Component {
 
 	componentDidMount(){
 		const searchResult = this.props.location.state				
+		let companyData = []
 		fetch(api2)
 	      .then(res => res.json()) 
 	      .then(res => {                           
 	        var results = res.toString().toLowerCase()
-	        results=_.filter(res,function(item){
+	        
+	        async.eachSeries(res,function(i,next){
+	        	companyData.push({
+	        		id : i.id,
+	        		company : i.company.toLowerCase(),
+	        		description : i.description,
+	        	})	        	
+	        	next()
+	        })
+	        results=_.filter(companyData,function(item){
 	          return item.company.indexOf(searchResult)>-1;
-	        });                	          
+	        });                	          	        
 	          this.setState({
 	              data: results,
 	              searchResult : searchResult
 	          })
+
 	      })
 	}
 
