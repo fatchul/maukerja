@@ -7,6 +7,7 @@ import registerServiceWorker from './registerServiceWorker';
 import Home from './components/jobs/Home';
 import Login from './components/Login';
 import viewJobs from './components/jobs/Viewdata';
+import searchJobs from './components/jobs/Searchdata';
 import editJobs from './components/jobs/Editdata';
 
 import { BrowserRouter as Router, Route } from "react-router-dom";
@@ -32,6 +33,7 @@ ReactDOM.render(
 	      <Route path="/login" component={Login} />
 	      <Route path="/view" component={viewJobs} />
 	      <Route path="/edit" component={editJobs} />
+	      <Route path="/search" component={searchJobs} />
 	    </div>
 	  </Router>
 	, document.getElementById('root'));

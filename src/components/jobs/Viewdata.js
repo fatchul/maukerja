@@ -126,7 +126,7 @@ class Viewdata extends Component {
 			                <h4></h4>
 			                
 			                <hr></hr>
-			                {/*Nationality : {this.state.data.nationality}*/}			                
+			                Nationality : {this.state.data.nationality}
 					</div>
 				</div>
 			</div>			

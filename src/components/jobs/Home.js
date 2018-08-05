@@ -5,7 +5,7 @@ import '../../App.css';
 import viewJobs from './Viewdata';
 import editJobs from './Editdata';
 import Cookies from 'universal-cookie';
-import _ from 'lodash';
+
 import Pagination from "react-js-pagination";
 
 
@@ -48,8 +48,7 @@ class Home extends React.Component {
       })
   }
 
-
-
+  // link add job 
   _onAddClick() {
     this.setState({
       showData: false,
@@ -57,6 +56,7 @@ class Home extends React.Component {
     });
   }
 
+  // post data add job
   handleSubmit(event) {
     event.preventDefault();
    
@@ -162,23 +162,14 @@ class Home extends React.Component {
   _handleKeyPress(e) {
     if (e.key === 'Enter') {      
       var searchResult = e.target.value
-      fetch(api2)
-      .then(res => res.json()) 
-      .then(res => {                           
-        var results = res.toString().toLowerCase()
-        results=_.filter(res,function(item){
-          return item.company.indexOf(searchResult)>-1;
-        });        
-        
-          console.log(results)
-          this.setState({
-            searchResult : results,
-            findData : true,
-            showData: false            
-          })
-        
-        
+      this.props.history.push({
+        pathname: '/search',
+        search: '?query='+searchResult,
+        state: searchResult
       })
+      // this.props.history.push('/search?v='+searchResult,{state:searchResult}) 
+
+      
       
     }
   }
