@@ -5,6 +5,9 @@ import '../../App.css';
 import viewJobs from './Viewdata';
 import editJobs from './Editdata';
 import Cookies from 'universal-cookie';
+import _ from 'lodash';
+import Pagination from "react-js-pagination";
+
 
 const mainAPI = "http://private-1e000-frontendtestmaukerja.apiary-mock.com/jobs";
 const api2 = "http://private-27298f-frontendtestmaukerja.apiary-mock.com/jobs?limit=20";
@@ -20,11 +23,17 @@ class Home extends React.Component {
       showData: true,
       msgTrue: false,
       msgFalse: false,
-      isLogon:undefined
+      isLogon:undefined,      
+      activePage: 5,   
+      searchResult:null,
+      findData:false
+
     }    
     this.handleSubmit = this.handleSubmit.bind(this);
     this.deleteMember = this.deleteMember.bind(this);
     this._onAddClick = this._onAddClick.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);    
+    this._handleKeyPress = this._handleKeyPress.bind(this);
   }
 
   componentWillMount() {    
@@ -38,6 +47,8 @@ class Home extends React.Component {
         })
       })
   }
+
+
 
   _onAddClick() {
     this.setState({
@@ -112,7 +123,13 @@ class Home extends React.Component {
 
 
   }
-
+  
+  handlePageChange(pageNumber) {    
+    this.setState({
+      activePage: pageNumber      
+    });
+  }
+  
   deleteMember(member) {
     let apiDelete = "http://private-27298f-frontendtestmaukerja.apiary-mock.com/job/"+member  
     fetch(apiDelete, {
@@ -141,10 +158,36 @@ class Home extends React.Component {
       });
 
   }
+
+  _handleKeyPress(e) {
+    if (e.key === 'Enter') {      
+      var searchResult = e.target.value
+      fetch(api2)
+      .then(res => res.json()) 
+      .then(res => {                           
+        var results = res.toString().toLowerCase()
+        results=_.filter(res,function(item){
+          return item.company.indexOf(searchResult)>-1;
+        });        
+        
+          console.log(results)
+          this.setState({
+            searchResult : results,
+            findData : true,
+            showData: false            
+          })
+        
+        
+      })
+      
+    }
+  }
+
   render() {
     if (this.state.matches.length === 0) {
       return <div className="loader"></div>
-    }    
+    }
+    
     return (
       <main role="main" className="container">
         <Helmet>
@@ -155,12 +198,21 @@ class Home extends React.Component {
           <div className="container">
             <div className="row">              
               <button className="btn btn-primary" onClick={this._onAddClick}>Add New Data</button>
-            </div>
-
+            </div>            
             <div className="row">
             Total Data : {this.state.matches.length} Records
             </div>
+            
             <div className="row">
+              <div className="form-group">
+                  <label htmlFor="title">Search</label>
+                  <input id="title" className="form-control" placeholder="Search by company" name="search" type="text" onKeyPress={this._handleKeyPress}/>
+                </div>
+            </div>
+                      
+            
+            <div className="row">
+               
             <div className="panel panel-default p50 uth-panel">
               <table className="table table-hover">
                 <thead>
@@ -233,8 +285,124 @@ class Home extends React.Component {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              activePage={this.state.activePage}
+              itemsCountPerPage={5}
+              totalItemsCount={this.state.matches.length}
+              pageRangeDisplayed={5}
+              onChange={this.handlePageChange}
+            />
             </div>
-          </div> :
+          </div>
+          
+          :
+          null
+        }
+
+
+
+        {this.state.findData ?
+          <div className="container">
+            <div className="row">              
+              <button className="btn btn-primary" onClick={this._onAddClick}>Add New Data</button>
+            </div>            
+            <div className="row">
+            Total Data : {this.state.matches.length} Records
+            </div>
+            
+            <div className="row">
+              <div className="form-group">
+                  <label htmlFor="title">Search</label>
+                  <input id="title" className="form-control" name="search" type="text" onKeyPress={this._handleKeyPress}/>
+                </div>
+            </div>
+                      
+            
+            <div className="row">
+               
+            <div className="panel panel-default p50 uth-panel">
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Company</th>
+                    <th>Title</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Responsibilites</th>
+                    <th>Total View</th>
+                    <th>View</th>
+                    <th>
+                    {
+                      this.state.isLogon ?
+                        <div>
+                          Edit | Delete 
+                        </div>
+                      : null
+                    }
+                    </th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.searchResult.map(member =>
+                    <tr key={member.id}>
+                      <td>{member.id} </td>
+                      <td>{member.company} </td>
+                      <td>{member.title} </td>
+                      <td>{member.location} </td>
+                      <td>{member.type} </td>
+                      <td>
+                        {member.responsibilites.map(resp =>
+                          <ul >
+                            <li key={resp}>{resp}</li>
+                          </ul>
+                        )}
+                      </td>
+                      <td>{member.views} </td>
+                      <td><span className="btn btn-success btn-xs">
+                        <Link to={
+                          {
+                            pathname : '/view/'+member.id,
+                            state : member.id,
+                            component : 'views'
+                          }
+                        }>View</Link></span>
+                      </td>
+                      <td>
+                      {
+                        this.state.isLogon ?
+                        <div className="">
+                        <span className="btn btn-warning btn-xs">
+                          <Link to={
+                            {
+                              pathname : '/edit/'+member.id,
+                              state : member.id
+                            }
+                          }>Edit</Link>
+
+                          </span>
+                        <span className="btn btn-danger btn-xs" onClick={() => this.deleteMember(member.id)}>Delete</span>
+                        </div>
+                        : null
+                      }
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              activePage={this.state.activePage}
+              itemsCountPerPage={5}
+              totalItemsCount={this.state.matches.length}
+              pageRangeDisplayed={5}
+              onChange={this.handlePageChange}
+            />
+            </div>
+          </div>
+          
+          :
           null
         }
 
