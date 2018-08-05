@@ -187,9 +187,13 @@ class Home extends React.Component {
 
         {this.state.showData ?
           <div className="container">
-            <div className="row">              
-              <button className="btn btn-primary" onClick={this._onAddClick}>Add New Data</button>
-            </div>            
+            {
+              this.state.isLogon ?
+              <div className="row">              
+                <button className="btn btn-primary" onClick={this._onAddClick}>Add New Data</button>
+              </div> :
+              null
+            }
             <div className="row">
             Total Data : {this.state.matches.length} Records
             </div>
